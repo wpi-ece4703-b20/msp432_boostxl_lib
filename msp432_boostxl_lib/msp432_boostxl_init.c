@@ -279,6 +279,11 @@ void ADC14_IRQHandler(void) {
 
 }
 
+void msp432_boostxl_init() {
+    errorledoff();
+    initClock();
+}
+
 void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
                               msp432_sample_process_t _cb
                              ) {

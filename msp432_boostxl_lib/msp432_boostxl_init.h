@@ -31,6 +31,8 @@ typedef enum {
 typedef uint16_t (*msp432_sample_process_t)(uint16_t);
 typedef void     (*msp432_buffer_process_t)(uint16_t *, uint16_t *);
 
+void msp432_boostxl_init();
+
 void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
                               msp432_sample_process_t _cb
                              );
