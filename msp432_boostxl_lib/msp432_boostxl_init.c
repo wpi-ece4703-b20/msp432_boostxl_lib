@@ -1,6 +1,6 @@
 #include "msp432_boostxl_init.h"
 #include "dac8311.h"
-#include <string.h>  // memset
+#include <string.h>  // memset and friends
 
 typedef enum {io_poll, io_intr, io_dma} io_enum_t;
 io_enum_t glbIO;
@@ -82,13 +82,27 @@ void initClock() {
     CS_initClockSignal(CS_BCLK,   CS_REFOCLK_SELECT,  CS_CLOCK_DIVIDER_1);
 }
 
-void errorledon() {
+void dutypininit() {
+    GPIO_setAsOutputPin( GPIO_PORT_P5, GPIO_PIN7);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P5, GPIO_PIN7);
+}
+void dutypinhigh() {
+    GPIO_setOutputHighOnPin( GPIO_PORT_P5, GPIO_PIN7);
+}
+
+void dutypinlow() {
+    GPIO_setOutputLowOnPin( GPIO_PORT_P5, GPIO_PIN7);
+}
+
+void errorledinit() {
     GPIO_setAsOutputPin( GPIO_PORT_P1, GPIO_PIN0);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P1, GPIO_PIN0);
+}
+void errorledon() {
     GPIO_setOutputHighOnPin( GPIO_PORT_P1, GPIO_PIN0);
 }
 
 void errorledoff() {
-    GPIO_setAsOutputPin( GPIO_PORT_P1, GPIO_PIN0);
     GPIO_setOutputLowOnPin( GPIO_PORT_P1, GPIO_PIN0);
 }
 
@@ -267,20 +281,30 @@ void DMA_ERR_IRQHandler(void) {
 
 void ADC14_IRQHandler(void) {
     uint64_t status;
+    static int recursive = 0;
+
+    if (recursive) errorledon();
 
     status = ADC14_getEnabledInterruptStatus();
     ADC14_clearInterruptFlag(status);
 
     if (status & ADC_INT0) {
         glbPingADC[0] = ADC14_getResult(ADC_MEM0);
+
+        recursive = 1;
+        dutypinhigh();
         glbPingDAC[0] = glbSampleCallback(glbPingADC[0]);
+        dutypinlow();
+        recursive = 0;
+
         DAC8311_updateDacOut(glbPingDAC[0]);
     }
 
 }
 
 void msp432_boostxl_init() {
-    errorledoff();
+    dutypininit();
+    errorledinit();
     initClock();
 }
 
@@ -291,7 +315,8 @@ void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
     glbBUFLEN = 1;
     glbSampleCallback = _cb;
 
-    errorledoff();
+    dutypininit();
+    errorledinit();
     initClock();
 
     initAmp();
@@ -310,7 +335,8 @@ void msp432_boostxl_init_intr(FS_enum_t          _fs,
     glbBUFLEN = 1;
     glbSampleCallback = _cb;
 
-    errorledoff();
+    dutypininit();
+    errorledinit();
     initClock();
 
     initAmp();
@@ -332,7 +358,8 @@ void msp432_boostxl_init_dma (FS_enum_t          _fs,
     configureBuffer(_pplen);
     glbBufferCallback = _cb;
 
-    errorledoff();
+    dutypininit();
+    errorledinit();
     initClock();
 
     initAmp();
@@ -354,7 +381,10 @@ void msp432_boostxl_run() {
             while (ADC14_isBusy()) ;
             glbPingADC[0] = ADC14_getResult(ADC_MEM0);
 
+            dutypinhigh();
             glbPingDAC[0] = glbSampleCallback(glbPingADC[0]);
+            dutypinlow();
+
             DAC8311_updateDacOut(glbPingDAC[0]);
          }
 
@@ -379,12 +409,19 @@ void msp432_boostxl_run() {
 
             if ((glbADCPPWrite == PONG) && (glbADCPPRead == PING)) {
 
+                dutypinhigh();
                 glbBufferCallback(glbPingADC, glbPingDAC);
+                dutypinlow();
+
                 glbADCPPRead  = PONG;
                 glbDACPPWrite = PONG;
 
             } else if ((glbADCPPWrite == PING) && (glbADCPPRead == PONG)) {
+
+                dutypinhigh();
                 glbBufferCallback(glbPongADC, glbPongDAC);
+                dutypinlow();
+
                 glbADCPPRead  = PING;
                 glbDACPPWrite = PING;
             }
