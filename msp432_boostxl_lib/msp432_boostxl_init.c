@@ -52,6 +52,10 @@ void initMic(BOOSTXL_IN_enum_t input) {
     GPIO_setOutputLowOnPin(MIC_POWER_PORT, MIC_POWER_PIN);
 }
 
+void initSwitch() {
+    GPIO_setAsInputPin   (MIC_POWER_PORT, MIC_POWER_PIN);
+}
+
 void micOn(void) {
     GPIO_setOutputHighOnPin(MIC_POWER_PORT, MIC_POWER_PIN);
 }
@@ -104,6 +108,27 @@ void errorledon() {
 
 void errorledoff() {
     GPIO_setOutputLowOnPin( GPIO_PORT_P1, GPIO_PIN0);
+}
+
+void initPushButton() {
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1);
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4);
+}
+
+int pushButtonLeftDown() {
+    return (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN1) == 0);
+}
+
+int pushButtonLeftUp() {
+    return (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN1) != 0);
+}
+
+int pushButtonRightDown() {
+    return (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN4) == 0);
+}
+
+int pushButtonRightUp() {
+    return (GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN4) != 0);
 }
 
 void blockingerror() {
@@ -305,6 +330,7 @@ void ADC14_IRQHandler(void) {
 void msp432_boostxl_init() {
     dutypininit();
     errorledinit();
+    initPushButton();
     initClock();
 }
 
@@ -317,6 +343,7 @@ void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
 
     dutypininit();
     errorledinit();
+    initPushButton();
     initClock();
 
     initAmp();
@@ -337,6 +364,7 @@ void msp432_boostxl_init_intr(FS_enum_t          _fs,
 
     dutypininit();
     errorledinit();
+    initPushButton();
     initClock();
 
     initAmp();
@@ -360,6 +388,7 @@ void msp432_boostxl_init_dma (FS_enum_t          _fs,
 
     dutypininit();
     errorledinit();
+    initPushButton();
     initClock();
 
     initAmp();

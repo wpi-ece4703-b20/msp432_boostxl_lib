@@ -56,4 +56,9 @@ void errorledoff();
 uint32_t measurePerfSample(msp432_sample_process_t _cb);
 uint32_t measurePerfBuffer(msp432_buffer_process_t _cb);
 
+int pushButtonLeftUp();
+int pushButtonLeftDown();
+int pushButtonRightUp();
+int pushButtonRightDown();
+
 #endif /* MSP432_BOOSTXL_INIT_H_ */
