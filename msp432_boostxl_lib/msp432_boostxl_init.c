@@ -14,11 +14,13 @@ uint16_t  glbPingADC[MAXPPLEN];
 uint16_t  glbPongADC[MAXPPLEN];
 volatile uint8_t   glbADCPPWrite = PING;
 volatile uint8_t   glbADCPPRead  = PING;
+volatile uint8_t   glbDACPPWrite = PING;
+volatile uint8_t   glbDACPPRead  = PING;
 
 uint16_t  glbPingDAC[MAXPPLEN];
 uint16_t  glbPongDAC[MAXPPLEN];
-volatile uint8_t   glbDACPPWrite = PING;
-volatile uint8_t   glbDACPPRead  = PING;
+uint16_t* glbActiveDACBuf = glbPongDAC;
+uint16_t  glbDACBufIndex  = 0;
 
 msp432_sample_process_t glbSampleCallback = 0;
 msp432_buffer_process_t glbBufferCallback = 0;
@@ -194,35 +196,6 @@ void stopSampleClock() {
     Timer_A_stopTimer(TIMER_A0_BASE);
 }
 
-void TA0_N_IRQHandler (void) {
-    static uint8_t k = 0;
-
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_1);
-
-    if (glbIO == io_intr) {
-
-        DAC8311_updateDacOut(glbPingDAC[0]);
-
-    } else if (glbIO == io_dma) {
-
-        if ((glbDACPPWrite == PONG) && (glbDACPPRead == PING)) {
-            DAC8311_updateDacOut(glbPingDAC[k++]);
-            if (k == glbBUFLEN) {
-                glbDACPPRead  = PONG;
-                k = 0;
-            }
-        } else if ((glbDACPPWrite == PING) && (glbDACPPRead == PONG)) {
-            DAC8311_updateDacOut(glbPongDAC[k++]);
-            if (k == glbBUFLEN) {
-                glbDACPPRead  = PING;
-                k = 0;
-            }
-        }
-
-    } else
-        blockingerror();
-}
-
 static DMA_ControlTable  dmaControlTable[32];
 
 void initADC(BOOSTXL_IN_enum_t  _audioin) {
@@ -273,10 +246,16 @@ void initADC(BOOSTXL_IN_enum_t  _audioin) {
         DMA_disableChannelAttribute(DMA_CH7_ADC14, (UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST | UDMA_ATTR_HIGH_PRIORITY | UDMA_ATTR_REQMASK));
 
         DMA_setChannelControl(DMA_CH7_ADC14 | UDMA_PRI_SELECT, (UDMA_SIZE_16 | UDMA_SRC_INC_NONE | UDMA_DST_INC_16 | UDMA_ARB_1));
-        DMA_setChannelControl(DMA_CH7_ADC14 | UDMA_ALT_SELECT, (UDMA_SIZE_16 | UDMA_SRC_INC_NONE | UDMA_DST_INC_16 | UDMA_ARB_1));
-
         DMA_setChannelTransfer(DMA_CH7_ADC14 | UDMA_PRI_SELECT, UDMA_MODE_PINGPONG, (void*) &ADC14->MEM[0], (void *) (glbPingADC), glbBUFLEN);
+
+        DMA_setChannelControl(DMA_CH7_ADC14 | UDMA_ALT_SELECT, (UDMA_SIZE_16 | UDMA_SRC_INC_NONE | UDMA_DST_INC_16 | UDMA_ARB_1));
         DMA_setChannelTransfer(DMA_CH7_ADC14 | UDMA_ALT_SELECT, UDMA_MODE_PINGPONG, (void*) &ADC14->MEM[0], (void *) (glbPongADC), glbBUFLEN);
+        glbADCPPWrite   = PING;
+        glbADCPPRead    = PONG;
+        glbDACPPWrite   = PING;
+        glbDACPPRead    = PONG;
+        glbActiveDACBuf = glbPongDAC;
+        glbDACBufIndex  = 0;
 
         DMA_assignInterrupt(DMA_INT1, DMA_CHANNEL_7);
         Interrupt_enableInterrupt(INT_DMA_INT1);
@@ -285,13 +264,42 @@ void initADC(BOOSTXL_IN_enum_t  _audioin) {
     }
 }
 
+void TA0_N_IRQHandler (void) {
+    Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_1);
+
+    if (glbIO == io_intr) {
+
+        DAC8311_updateDacOut(glbPingDAC[0]);
+
+    } else if (glbIO == io_dma) {
+
+        DAC8311_updateDacOut(glbActiveDACBuf[glbDACBufIndex++]);
+
+        if (glbDACBufIndex == glbBUFLEN) {
+            glbDACBufIndex = 0;
+            if (glbDACPPWrite == PING) {
+                dutypinhigh();
+               glbActiveDACBuf = glbPingDAC;
+            } else {
+                dutypinlow();
+              glbActiveDACBuf = glbPongDAC;
+            }
+        }
+
+    } else
+
+        blockingerror();
+}
+
 void DMA_INT1_IRQHandler(void) {
     if(DMA_getChannelAttribute(7) & UDMA_ATTR_ALTSELECT) {
-        glbADCPPWrite = PONG;
+        DMA_setChannelControl(DMA_CH7_ADC14 | UDMA_PRI_SELECT, (UDMA_SIZE_16 | UDMA_SRC_INC_NONE | UDMA_DST_INC_16 | UDMA_ARB_1));
         DMA_setChannelTransfer(DMA_CH7_ADC14 | UDMA_PRI_SELECT, UDMA_MODE_PINGPONG, (void*) &ADC14->MEM[0], (void *) (glbPingADC), glbBUFLEN);
-    } else {
         glbADCPPWrite = PING;
+    } else {
+        DMA_setChannelControl(DMA_CH7_ADC14 | UDMA_ALT_SELECT, (UDMA_SIZE_16 | UDMA_SRC_INC_NONE | UDMA_DST_INC_16 | UDMA_ARB_1));
         DMA_setChannelTransfer(DMA_CH7_ADC14 | UDMA_ALT_SELECT, UDMA_MODE_PINGPONG, (void*) &ADC14->MEM[0], (void *) (glbPongADC), glbBUFLEN);
+        glbADCPPWrite = PONG;
     }
 }
 
@@ -426,7 +434,6 @@ void msp432_boostxl_run() {
         while (1)
             PCM_gotoLPM0();
 
-
     } else if (glbIO == io_dma) {
 
         Interrupt_enableMaster();
@@ -434,25 +441,24 @@ void msp432_boostxl_run() {
         ADC14_enableConversion();
         startSampleClock();
 
+        glbADCPPRead = PING;
+
         while (1) {
 
-            if ((glbADCPPWrite == PONG) && (glbADCPPRead == PING)) {
+            if ((glbADCPPWrite == PING) & (glbADCPPRead == PONG)) {
 
-                dutypinhigh();
+                // dutypinhigh();
                 glbBufferCallback(glbPingADC, glbPingDAC);
-                dutypinlow();
+                glbADCPPRead = PING;  // ADC PING BUFFER HAS BEEN READ
+                glbDACPPWrite = PING; // DAC PING BUFFER HAS FILLED UP
 
-                glbADCPPRead  = PONG;
-                glbDACPPWrite = PONG;
+            } else if ((glbADCPPWrite == PONG) & (glbADCPPRead == PING)) {
 
-            } else if ((glbADCPPWrite == PING) && (glbADCPPRead == PONG)) {
-
-                dutypinhigh();
+                // dutypinlow();
                 glbBufferCallback(glbPongADC, glbPongDAC);
-                dutypinlow();
+                glbADCPPRead = PONG;   // ADC PONG BUFFER HAS BEEN READ
+                glbDACPPWrite = PONG;  // DAC PONG BUFFER HAS FILLED UP
 
-                glbADCPPRead  = PING;
-                glbDACPPWrite = PING;
             }
 
         }
@@ -542,10 +548,6 @@ uint32_t measurePerfBuffer(msp432_buffer_process_t _cb) {
         _cb(glbPingADC, glbPingDAC);
         cycles[k] = perfLap();
     }
-
-//    for (k = 0; k < N_MEASUREMENTS; k++) {
-//        printf("%d %d\n", overhead[k], cycles[k]);
-//    }
 
     return median(cycles) - median(overhead);
 }
