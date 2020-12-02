@@ -53,6 +53,14 @@ void msp432_boostxl_run();
 void errorledon();
 void errorledoff();
 
+void colorledred();
+void colorledgreen();
+void colorledblue();
+void colorledoff();
+
+void debugpinhigh();
+void debugpinlow();
+
 uint32_t measurePerfSample(msp432_sample_process_t _cb);
 uint32_t measurePerfBuffer(msp432_buffer_process_t _cb);
 

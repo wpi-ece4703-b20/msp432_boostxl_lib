@@ -88,6 +88,19 @@ void initClock() {
     CS_initClockSignal(CS_BCLK,   CS_REFOCLK_SELECT,  CS_CLOCK_DIVIDER_1);
 }
 
+void debugpininit() {
+    GPIO_setAsOutputPin( GPIO_PORT_P3, GPIO_PIN5);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P3, GPIO_PIN5);
+}
+
+void debugpinhigh() {
+    GPIO_setOutputHighOnPin( GPIO_PORT_P3, GPIO_PIN5);
+}
+
+void debugpinlow() {
+    GPIO_setOutputLowOnPin( GPIO_PORT_P3, GPIO_PIN5);
+}
+
 void dutypininit() {
     GPIO_setAsOutputPin( GPIO_PORT_P5, GPIO_PIN7);
     GPIO_setOutputLowOnPin( GPIO_PORT_P5, GPIO_PIN7);
@@ -104,12 +117,46 @@ void errorledinit() {
     GPIO_setAsOutputPin( GPIO_PORT_P1, GPIO_PIN0);
     GPIO_setOutputLowOnPin( GPIO_PORT_P1, GPIO_PIN0);
 }
+
 void errorledon() {
     GPIO_setOutputHighOnPin( GPIO_PORT_P1, GPIO_PIN0);
 }
 
 void errorledoff() {
     GPIO_setOutputLowOnPin( GPIO_PORT_P1, GPIO_PIN0);
+}
+
+void colorledinit() {
+    GPIO_setAsOutputPin( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setAsOutputPin( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setAsOutputPin( GPIO_PORT_P2, GPIO_PIN2);
+    GPIO_setOutputLowOnPin( GPIO_PORT_P2, GPIO_PIN2);
+}
+
+void colorledred() {
+    GPIO_setOutputHighOnPin ( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN2);
+}
+
+void colorledgreen() {
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setOutputHighOnPin ( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN2);
+}
+
+void colorledblue() {
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setOutputHighOnPin ( GPIO_PORT_P2, GPIO_PIN2);
+}
+
+void colorledoff() {
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN0);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN1);
+    GPIO_setOutputLowOnPin  ( GPIO_PORT_P2, GPIO_PIN2);
 }
 
 void initPushButton() {
@@ -337,7 +384,9 @@ void ADC14_IRQHandler(void) {
 
 void msp432_boostxl_init() {
     dutypininit();
+    debugpininit();
     errorledinit();
+    colorledinit();
     initPushButton();
     initClock();
 }
@@ -350,7 +399,9 @@ void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
     glbSampleCallback = _cb;
 
     dutypininit();
+    debugpininit();
     errorledinit();
+    colorledinit();
     initPushButton();
     initClock();
 
@@ -371,7 +422,9 @@ void msp432_boostxl_init_intr(FS_enum_t          _fs,
     glbSampleCallback = _cb;
 
     dutypininit();
+    debugpininit();
     errorledinit();
+    colorledinit();
     initPushButton();
     initClock();
 
@@ -395,7 +448,9 @@ void msp432_boostxl_init_dma (FS_enum_t          _fs,
     glbBufferCallback = _cb;
 
     dutypininit();
+    debugpininit();
     errorledinit();
+    colorledinit();
     initPushButton();
     initClock();
 
@@ -447,14 +502,12 @@ void msp432_boostxl_run() {
 
             if ((glbADCPPWrite == PING) & (glbADCPPRead == PONG)) {
 
-                // dutypinhigh();
                 glbBufferCallback(glbPingADC, glbPingDAC);
                 glbADCPPRead = PING;  // ADC PING BUFFER HAS BEEN READ
                 glbDACPPWrite = PING; // DAC PING BUFFER HAS FILLED UP
 
             } else if ((glbADCPPWrite == PONG) & (glbADCPPRead == PING)) {
 
-                // dutypinlow();
                 glbBufferCallback(glbPongADC, glbPongDAC);
                 glbADCPPRead = PONG;   // ADC PONG BUFFER HAS BEEN READ
                 glbDACPPWrite = PONG;  // DAC PONG BUFFER HAS FILLED UP
