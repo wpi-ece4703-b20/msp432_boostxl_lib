@@ -1,19 +1,19 @@
 /* msp432_boostxl
    Written by Patrick Schaumont (pschaumont@wpi.edu) at Worcester Polytechnic Institute in 2020
 
-msp432_boostxl is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 3, or (at your option) any later
-version.
+   msp432_boostxl is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 3, or (at your option) any later
+   version.
 
-msp432_boostxl is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
+   msp432_boostxl is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
 
-You should have received a copy of the GNU General Public License
-along with msp432_boostxl; see the file COPYING3.  If not see
-<http://www.gnu.org/licenses/>.  */
+   You should have received a copy of the GNU General Public License
+   along with msp432_boostxl; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>.  */
 
 
 #ifndef MSP432_BOOSTXL_INIT_H_
