@@ -1,7 +1,20 @@
 # MSP432_BOOSTXL_LIB
 
 MSP432_BOOSTXL_LIB is a support library that offers support for flexible input/output
-in a real-time DSP application. The library was specifically designed for this course and can be `consulted on github <https://github.com/wpi-ece4703-b20/msp432_boostxl_lib>`_.
+in a real-time DSP application. 
+Written by Patrick Schaumont (pschaumont@wpi.edu) at Worcester Polytechnic Institute in 2020
+
+msp432_boostxl is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 3, or (at your option) any later
+   version.
+
+msp432_boostxl is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+   You should have received a copy of the GNU General Public License
+   along with msp432_boostxl; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>. 
 
 The following is a list of the public functions defined in this library.
 
@@ -9,9 +22,8 @@ The following is a list of the public functions defined in this library.
 
 This function configures the processor clock of the ARM Cortex M4 to 48MHz. The function can be used when neither D/A nor A/D conversions are required.
 
-   #include "msp432_boostxl_init.h"
-
-   void msp432_boostxl_init();
+    #include "msp432_boostxl_init.h"
+    void msp432_boostxl_init();
 
 
 ## msp432_boostxl_run()
@@ -22,20 +34,18 @@ This function starts the conversion process. Before calling this function the us
 *  ``msp432_boostxl_init_intr()`` for interrupt mode conversion
 *  ``msp432_boostxl_init_dma()`` for dma mode conversion
 
-   #include "msp432_boostxl_init.h"
-
-   void msp432_boostxl_run();
+    #include "msp432_boostxl_init.h"
+    void msp432_boostxl_run();
 
 ## msp432_boostxl_init_poll()
 
 This function configures the processor clock of the ARM Cortex M4 to 48MHz, turns on the microphone, and initializes the hardware in polling mode. In polling mode, the following steps are repeated as fast as the hardware allows: (1) An A/D conversion from a user-defined sources is completed, (2) a user-defined call-back function is executed with the converted sample as argument, (3) the value returned by the user-defined call-back function is forwarded to the D/A. The speed of A/D conversions is limited due to the speed of the successive approximation ADC in the MSP432. The speed of the D/A conversions is limited by the SPI connection between the MSP432 and the off-chip DAC8331.
 
 
-   #include "msp432_boostxl_init.h"
-
-   void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
-                                 msp432_sample_process_t _cb
-                                 );
+    #include "msp432_boostxl_init.h"
+    void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
+                                  msp432_sample_process_t _cb
+                                  );
 
 * ``BOOSTXL_IN_enum_t  _audioin`` indicates the source used by the ADC converter, and is one of the following selections.
 
