@@ -34,9 +34,8 @@ This function starts the conversion process. Before calling this function the us
 *  ``msp432_boostxl_init_intr()`` for interrupt mode conversion
 *  ``msp432_boostxl_init_dma()`` for dma mode conversion
 
-
-     #include "msp432_boostxl_init.h"
-     void msp432_boostxl_run();
+    #include "msp432_boostxl_init.h"
+    void msp432_boostxl_run();
 
 ## msp432_boostxl_init_poll()
 
