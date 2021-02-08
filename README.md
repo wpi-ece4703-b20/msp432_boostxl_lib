@@ -1,7 +1,8 @@
 # MSP432_BOOSTXL_LIB
 
 MSP432_BOOSTXL_LIB is a support library that offers support for flexible input/output
-in a real-time DSP application. 
+in a real-time DSP application. The library is written for an MSPEXP432P401R Launchpad.
+
 Written by Patrick Schaumont (pschaumont@wpi.edu) at Worcester Polytechnic Institute in 2020
 
 msp432_boostxl is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
@@ -163,28 +164,6 @@ This function measures the median execution time, counted in clock cycles, of a 
 
 * ``msp432_buffer_process_t _cb`` is a pointer to the callback function called after the ping-pong buffers have filled up. The calllback function has type ``typedef void (*msp432_buffer_process_t)(uint16_t *, uint16_t *)`` and takes two arguments. The first argument is a pointer to the input buffer of ``_pplen`` elements of type ``uint16_t``. The second argument is a pointer to the output buffer of ``_pplen`` elements of type ``uint16_t``. The callback function returns void.
 
-## errorledoff()
-
-This function turns off LED 2 of the MSPEXP432P401R board.
-
-.. code:: c
-
-```
-   #include "msp432_boostxl_init.h"
-
-   void errorledon();
-```
-
-## errorledon()
-
-This function turns on LED 2 of the MSPEXP432P401R board.
-
-```
-   #include "msp432_boostxl_init.h"
-
-   void errorledoff();
-```
-
 ## adc14_to_q15
 
 This function converts a 14-bit ADC value to a fixed-point fix<16,15> Q15 value.
@@ -251,22 +230,125 @@ The analog range spans [0v, 3v3] corresponding to range [-0.25,0.25].
    uint16_t  f32_to_dac14(float32_t v);
 ```
 
-## Examples
+## errorledoff()
 
-This program calls the A/D conversion in polled mode.
+This function turns off LED 2 of the MSPEXP432P401R board.
+
+.. code:: c
 
 ```
-   uint16_t processSample(uint16_t in) {
-     return 0x3FFF - in;
-   }
+   #include "msp432_boostxl_init.h"
 
-   int main(void) {
-      WDT_A_hold(WDT_A_BASE);
+   void errorledon();
+```
 
-      msp432_boostxl_init_poll(BOOSTXL_J1_2_IN, processSample);
+## errorledon()
 
-      msp432_boostxl_run();
+This function turns on LED 2 of the MSPEXP432P401R board.
 
-      return 1;
-  }
+```
+   #include "msp432_boostxl_init.h"
+
+   void errorledoff();
+```
+
+
+## colorledred()
+
+This function sets on LED 1 of the MSPEXP432P401R board to red color.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void colorledred();
+```
+
+## colorledgreen()
+
+This function sets on LED 1 of the MSPEXP432P401R board to green color.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void colorledgreen();
+```
+
+## colorledblue()
+
+This function sets on LED 1 of the MSPEXP432P401R board to blue color.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void colorledblue();
+```
+
+## colorledoff()
+
+This function turns off LED 1 of the MSPEXP432P401R board.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void colorledoff();
+```
+
+## debugpinhigh()
+
+This function pulls high pin J4.32 (GPIO P3.5) of the MSPEXP432P401R board.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void debugpinhigh();
+```
+
+## debugpinlow()
+
+This function pulls low pin J4.32 (GPIO P3.5) of the MSPEXP432P401R board.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   void debugpinlow();
+```
+
+## pushButtonLeftUp()
+
+This function returns true (nonzero) if the left button of the MSPEXP432P401R board is not pressed.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   int pushButtonLeftUp();
+```
+
+## pushButtonLeftDown()
+
+This function returns true (nonzero) if the left button of the MSPEXP432P401R board is pressed.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   int pushButtonLeftDown();
+```
+
+## pushButtonRightUp()
+
+This function returns true (nonzero) if the right button of the MSPEXP432P401R board is not pressed.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   int pushButtonRightUp();
+```
+
+## pushButtonRightDown()
+
+This function returns true (nonzero) if the right button of the MSPEXP432P401R board is pressed.
+
+```
+   #include "msp432_boostxl_init.h"
+
+   int pushButtonRightDown();
 ```
