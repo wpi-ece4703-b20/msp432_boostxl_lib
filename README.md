@@ -34,18 +34,19 @@ This function starts the conversion process. Before calling this function the us
 *  ``msp432_boostxl_init_intr()`` for interrupt mode conversion
 *  ``msp432_boostxl_init_dma()`` for dma mode conversion
 
-    #include "msp432_boostxl_init.h"
-    void msp432_boostxl_run();
+
+     #include "msp432_boostxl_init.h"
+     void msp432_boostxl_run();
 
 ## msp432_boostxl_init_poll()
 
 This function configures the processor clock of the ARM Cortex M4 to 48MHz, turns on the microphone, and initializes the hardware in polling mode. In polling mode, the following steps are repeated as fast as the hardware allows: (1) An A/D conversion from a user-defined sources is completed, (2) a user-defined call-back function is executed with the converted sample as argument, (3) the value returned by the user-defined call-back function is forwarded to the D/A. The speed of A/D conversions is limited due to the speed of the successive approximation ADC in the MSP432. The speed of the D/A conversions is limited by the SPI connection between the MSP432 and the off-chip DAC8331.
 
 
-    #include "msp432_boostxl_init.h"
-    void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
-                                  msp432_sample_process_t _cb
-                                  );
+     #include "msp432_boostxl_init.h"
+     void msp432_boostxl_init_poll(BOOSTXL_IN_enum_t  _audioin,
+                                   msp432_sample_process_t _cb
+                                   );
 
 * ``BOOSTXL_IN_enum_t  _audioin`` indicates the source used by the ADC converter, and is one of the following selections.
 
